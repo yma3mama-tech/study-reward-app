@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>がんばリワード</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Kaisei+Decol:wght@400;700&display=swap');
+
+  :root {
+    --bg: #fdf6ec;
+    --paper: #fffcf6;
+    --accent1: #e8734a;
+    --accent2: #f5c842;
+    --accent3: #6bba8c;
+    --accent4: #5b8dd9;
+    --ink: #2d1f0e;
+    --ink-soft: #6b5040;
+    --ink-faint: #c4a882;
+    --border: #e0c9a6;
+    --shadow: rgba(100,60,20,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  /* background texture */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(232,115,74,0.07) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(107,186,140,0.07) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c4a882' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  /* header */
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .header-emoji {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 4px;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.15));
+  }
+  .header h1 {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent1);
+    letter-spacing: 0.05em;
+  }
+  .header p {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  /* card */
+  .card {
+    background: var(--paper);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px var(--shadow), 0 1px 0 #fff inset;
+    transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: 0 6px 24px var(--shadow); }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  /* inputs */
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
+  }
+  input[type="text"] {
+    width: 100%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  input[type="text"]:focus {
+    border-color: var(--accent1);
+    box-shadow: 0 0 0 3px rgba(232,115,74,0.15);
+  }
+  input[type="text"]::placeholder { color: var(--ink-faint); }
+
+  .field + .field { margin-top: 12px; }
+
+  /* prob badge */
+  .prob-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(91,141,217,0.12);
+    border: 1.5px solid rgba(91,141,217,0.3);
+    border-radius: 99px;
+    padding: 5px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent4);
+    margin-top: 10px;
+    transition: all 0.4s;
+  }
+  .prob-badge.prob1 { background: rgba(196,168,130,0.12); border-color: rgba(196,168,130,0.3); color: var(--ink-faint); }
+  .prob-badge.prob2 { background: rgba(107,186,140,0.12); border-color: rgba(107,186,140,0.3); color: var(--accent3); }
+  .prob-badge.prob3 { background: rgba(232,115,74,0.12); border-color: rgba(232,115,74,0.3); color: var(--accent1); }
+
+  /* timer section */
+  .timer-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .time-btn {
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 10px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    user-select: none;
+  }
+  .time-btn:active { transform: scale(0.96); }
+  .time-btn.set {
+    border-color: var(--accent3);
+    background: rgba(107,186,140,0.08);
+  }
+  .time-btn .time-icon { font-size: 22px; margin-bottom: 4px; }
+  .time-btn .time-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .time-btn .time-value {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+  }
+  .time-btn.set .time-value { color: var(--accent3); }
+  .time-btn .tap-hint {
+    font-size: 10px;
+    color: var(--ink-faint);
+    margin-top: 2px;
+  }
+
+  .elapsed-display {
+    background: linear-gradient(135deg, var(--accent4), #3a6bbf);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    color: #fff;
+    transition: opacity 0.3s;
+  }
+  .elapsed-display.hidden { opacity: 0; pointer-events: none; }
+  .elapsed-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; opacity: 0.8; }
+  .elapsed-value {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 32px;
+    font-weight: 700;
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  /* dice section */
+  .dice-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent1), #d45a2a);
+    border: none;
+    border-radius: 18px;
+    padding: 20px;
+    font-family: 'Kaisei Decol', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    box-shadow: 0 6px 20px rgba(232,115,74,0.4), 0 2px 0 rgba(255,255,255,0.2) inset;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    -webkit-tap-highlight-color: transparent;
+    margin-bottom: 16px;
+  }
+  .dice-btn:active { transform: scale(0.97); box-shadow: 0 3px 10px rgba(232,115,74,0.4); }
+  .dice-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .dice-btn .btn-icon { font-size: 28px; }
+
+  /* dice visual */
+  .dice-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0;
+    min-height: 160px;
+    justify-content: center;
+  }
+
+  .dice {
+    width: 90px; height: 90px;
+    background: #fff;
+    border: 3px solid var(--border);
+    border-radius: 18px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 10px;
+    gap: 4px;
+    box-shadow: 0 8px 24px var(--shadow), 0 2px 0 #fff inset;
+    transition: transform 0.3s;
+    position: relative;
+  }
+  .dice.rolling {
+    animation: diceRoll 0.6s ease-out;
+  }
+  @keyframes diceRoll {
+    0% { transform: rotate(0deg) scale(1); }
+    20% { transform: rotate(-20deg) scale(1.15); }
+    40% { transform: rotate(15deg) scale(1.1); }
+    60% { transform: rotate(-10deg) scale(1.05); }
+    80% { transform: rotate(5deg) scale(1.02); }
+    100% { transform: rotate(0deg) scale(1); }
+  }
+  .pip {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: var(--ink);
+    transition: background 0.3s;
+  }
+  .pip.empty { background: transparent; }
+  .pip.win { background: var(--accent1); }
+
+  .dice-result {
+    text-align: center;
+    font-size: 40px;
+    line-height: 1;
+  }
+  .dice-result-text {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    text-align: center;
+    line-height: 1.5;
+  }
+  .dice-result-text.win { color: var(--accent1); }
+  .dice-result-text.lose { color: var(--ink-faint); }
+
+  /* history */
+  .history-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .history-item {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    animation: slideIn 0.25s ease-out;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .history-icon { font-size: 20px; flex-shrink: 0; }
+  .history-body { flex: 1; min-width: 0; }
+  .history-goal { font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-meta { color: var(--ink-faint); font-size: 11px; margin-top: 2px; }
+  .history-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 99px;
+    flex-shrink: 0;
+  }
+  .history-badge.win { background: rgba(232,115,74,0.12); color: var(--accent1); }
+  .history-badge.lose { background: rgba(196,168,130,0.15); color: var(--ink-faint); }
+
+  .empty-history {
+    text-align: center;
+    color: var(--ink-faint);
+    font-size: 13px;
+    padding: 20px 0;
+  }
+
+  /* custom confirm modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(45,31,14,0.35);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: fadeIn 0.15s ease-out;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-box {
+    background: var(--paper);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px 20px;
+    max-width: 320px;
+    width: 100%;
+    box-shadow: 0 16px 48px rgba(45,31,14,0.2);
+    animation: popIn 0.2s ease-out;
+  }
+  @keyframes popIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-title { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+  .modal-body { font-size: 14px; color: var(--ink-soft); margin-bottom: 20px; line-height: 1.6; }
+  .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .modal-btn {
+    border: none; border-radius: 12px;
+    padding: 13px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .modal-btn:active { transform: scale(0.96); }
+  .modal-btn.cancel { background: var(--bg); color: var(--ink-soft); border: 2px solid var(--border); }
+  .modal-btn.danger { background: linear-gradient(135deg, #e8734a, #d45a2a); color: #fff; box-shadow: 0 4px 12px rgba(232,115,74,0.3); }
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 12px;
+    color: var(--ink-faint);
+    cursor: pointer;
+    margin-top: 12px;
+    display: block;
+    width: 100%;
+    transition: all 0.15s;
+  }
+  .clear-btn:hover { border-color: var(--ink-faint); color: var(--ink-soft); }
+
+  /* confetti */
+  .confetti-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 999;
+    overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute;
+    top: -20px;
+    width: 10px; height: 14px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* section divider */
+  .section-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 900;
+    color: #fff;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <span class="header-emoji">📚</span>
+    <h1>がんばリワード</h1>
+    <p>目標を達成してサイコロでご褒美をゲットしよう！</p>
+  </div>
+
+  <!-- STEP 1: 目標とご褒美 -->
+  <div class="card">
+    <div class="card-title">
+      <span class="section-num" style="background:var(--accent1)">1</span>
+      <span class="dot" style="background:var(--accent1)"></span>
+      目標とご褒美の設定
+    </div>
+    <div class="field">
+      <label>🎯 今日の目標</label>
+      <input type="text" id="goalInput" placeholder="例：問題を5問解く" maxlength="40">
+    </div>
+    <div class="field">
+      <label>🎁 達成したときのご褒美</label>
+      <input type="text" id="rewardInput" placeholder="例：お菓子をひとつ食べられる" maxlength="40">
+    </div>
+  </div>
+
+  <!-- STEP 2: タイマー -->
+  <div class="card">
+    <div class="card-title">
+      <span class="section-num" style="background:var(--accent4)">2</span>
+      <span class="dot" style="background:var(--accent4)"></span>
+      学習時間の記録
+    </div>
+    <div class="timer-row">
+      <div class="time-btn" id="startBtn" onclick="setTime('start')">
+        <div class="time-icon">▶️</div>
+        <div class="time-label">開始時刻</div>
+        <div class="time-value" id="startDisplay">--:--</div>
+        <div class="tap-hint">タップして記録</div>
+      </div>
+      <div class="time-btn" id="endBtn" onclick="setTime('end')">
+        <div class="time-icon">⏹️</div>
+        <div class="time-label">終了時刻</div>
+        <div class="time-value" id="endDisplay">--:--</div>
+        <div class="tap-hint">タップして記録</div>
+      </div>
+    </div>
+    <div class="elapsed-display hidden" id="elapsedDisplay">
+      <div class="elapsed-label">⏱ 学習時間</div>
+      <div class="elapsed-value" id="elapsedValue">0分</div>
+    </div>
+    <div id="probBadge" style="display:none; text-align:center">
+      <span class="prob-badge" id="probBadgeInner"></span>
+    </div>
+  </div>
+
+  <!-- STEP 3: サイコロ -->
+  <div class="card">
+    <div class="card-title">
+      <span class="section-num" style="background:var(--accent3)">3</span>
+      <span class="dot" style="background:var(--accent3)"></span>
+      ご褒美チャレンジ
+    </div>
+    <button class="dice-btn" id="rollBtn" onclick="rollDice()">
+      <span class="btn-icon">🎲</span>
+      サイコロをふる！
+    </button>
+    <div class="dice-area">
+      <div class="dice" id="dice">
+        <!-- pips generated by JS -->
+      </div>
+      <div class="dice-result" id="diceResult" style="display:none"></div>
+      <div class="dice-result-text" id="diceResultText"></div>
+    </div>
+  </div>
+
+  <!-- STEP 4: 履歴 -->
+  <div class="card">
+    <div class="card-title">
+      <span class="section-num" style="background:var(--accent2); color:var(--ink)">4</span>
+      <span class="dot" style="background:var(--accent2)"></span>
+      きろく
+    </div>
+    <ul class="history-list" id="historyList">
+      <li class="empty-history">まだ記録がありません 📝</li>
+    </ul>
+    <button class="clear-btn" onclick="clearHistory()">記録をすべて消す</button>
+  </div>
+</div>
+
+<div class="confetti-container" id="confettiContainer"></div>
+
+<script>
+// --- State ---
+let startTime = null;
+let endTime = null;
+let elapsedMin = 0; // computed elapsed minutes
+let history = JSON.parse(localStorage.getItem('studyHistory') || '[]');
+
+// Dice pip layouts (which of 9 cells are filled, row-major)
+const DICE_LAYOUTS = {
+  1: [0,0,0, 0,1,0, 0,0,0],
+  2: [1,0,0, 0,0,0, 0,0,1],
+  3: [1,0,0, 0,1,0, 0,0,1],
+  4: [1,0,1, 0,0,0, 1,0,1],
+  5: [1,0,1, 0,1,0, 1,0,1],
+  6: [1,0,1, 1,0,1, 1,0,1],
+};
+
+// --- Probability from elapsed time ---
+function getWinProb(minutes) {
+  if (minutes >= 30) return 3;
+  if (minutes >= 10) return 2;
+  return 1;
+}
+
+function getProbLabel(prob) {
+  const icons = ['','🎲','🎲🎲','🎲🎲🎲'];
+  const labels = ['','1/6（10分未満）','2/6（10〜30分）','3/6（30分以上）'];
+  return `${icons[prob]} 当たり確率 ${labels[prob]}`;
+}
+
+function updateProbBadge() {
+  const prob = getWinProb(elapsedMin);
+  const badge = document.getElementById('probBadgeInner');
+  const wrap = document.getElementById('probBadge');
+  badge.textContent = getProbLabel(prob);
+  badge.className = `prob-badge prob${prob}`;
+  wrap.style.display = 'block';
+}
+
+function initDice(face) {
+  const dice = document.getElementById('dice');
+  const layout = DICE_LAYOUTS[face || 1];
+  dice.innerHTML = layout.map(on =>
+    `<div class="pip ${on ? '' : 'empty'}"></div>`
+  ).join('');
+}
+
+initDice(1);
+renderHistory();
+
+// --- Timer ---
+function setTime(type) {
+  const now = new Date();
+  const hhmm = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+
+  if (type === 'start') {
+    startTime = now;
+    document.getElementById('startDisplay').textContent = hhmm;
+    document.getElementById('startBtn').classList.add('set');
+  } else {
+    endTime = now;
+    document.getElementById('endDisplay').textContent = hhmm;
+    document.getElementById('endBtn').classList.add('set');
+  }
+
+  if (startTime && endTime) {
+    const diff = Math.round((endTime - startTime) / 60000);
+    const el = document.getElementById('elapsedDisplay');
+    el.classList.remove('hidden');
+    if (diff < 0) {
+      document.getElementById('elapsedValue').textContent = '時間を確認してください';
+      elapsedMin = 0;
+    } else {
+      elapsedMin = diff;
+      const h = Math.floor(diff / 60);
+      const m = diff % 60;
+      document.getElementById('elapsedValue').textContent =
+        h > 0 ? `${h}時間${m}分` : `${m}分`;
+      updateProbBadge();
+    }
+  }
+}
+
+// --- Dice Roll ---
+function rollDice() {
+  const goal = document.getElementById('goalInput').value.trim();
+  const reward = document.getElementById('rewardInput').value.trim();
+  if (!goal) {
+    const inp = document.getElementById('goalInput');
+    inp.focus();
+    inp.style.borderColor = 'var(--accent1)';
+    setTimeout(() => inp.style.borderColor = '', 1200);
+    return;
+  }
+
+  // Determine prob from elapsed time (default 1/6 if no time set)
+  const winProb = (startTime && endTime && elapsedMin >= 0) ? getWinProb(elapsedMin) : 1;
+
+  const btn = document.getElementById('rollBtn');
+  btn.disabled = true;
+
+  const dice = document.getElementById('dice');
+  dice.classList.remove('rolling');
+  void dice.offsetWidth;
+  dice.classList.add('rolling');
+
+  let count = 0;
+  const interval = setInterval(() => {
+    initDice(Math.floor(Math.random() * 6) + 1);
+    if (++count > 8) clearInterval(interval);
+  }, 80);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    const face = Math.floor(Math.random() * 6) + 1;
+    const won = face <= winProb;
+    initDice(face);
+    markWinPips(won);
+
+    const resultEl = document.getElementById('diceResult');
+    const textEl = document.getElementById('diceResultText');
+    resultEl.style.display = 'block';
+    resultEl.textContent = ['⚀','⚁','⚂','⚃','⚄','⚅'][face - 1];
+
+    if (won) {
+      textEl.className = 'dice-result-text win';
+      textEl.innerHTML = `🎉 当たり！ ${escHtml(reward || 'ご褒美ゲット')} をどうぞ！`;
+      launchConfetti();
+    } else {
+      textEl.className = 'dice-result-text lose';
+      textEl.innerHTML = `😊 残念！でもよく頑張りました！<br>次はきっと当たるよ！`;
+    }
+
+    addHistory(goal, reward, face, won, winProb);
+    btn.disabled = false;
+  }, 700);
+}
+
+function markWinPips(won) {
+  if (!won) return;
+  document.querySelectorAll('.dice .pip:not(.empty)').forEach(p => p.classList.add('win'));
+}
+
+// --- Confetti ---
+function launchConfetti() {
+  const container = document.getElementById('confettiContainer');
+  container.innerHTML = '';
+  const colors = ['#e8734a','#f5c842','#6bba8c','#5b8dd9','#e87ed4','#74c6e8'];
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.width = (8 + Math.random() * 8) + 'px';
+    el.style.height = (10 + Math.random() * 10) + 'px';
+    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    el.style.animationDelay = (Math.random() * 0.5) + 's';
+    container.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+// --- Custom Confirm Modal ---
+function showConfirm(title, body, onConfirm) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-title">${title}</div>
+      <div class="modal-body">${body}</div>
+      <div class="modal-btns">
+        <button class="modal-btn cancel" id="modalCancel">キャンセル</button>
+        <button class="modal-btn danger" id="modalOk">消す</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#modalCancel').onclick = () => overlay.remove();
+  overlay.querySelector('#modalOk').onclick = () => { overlay.remove(); onConfirm(); };
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+}
+
+// --- History ---
+function addHistory(goal, reward, face, won, winProb) {
+  const elapsed = (startTime && endTime && elapsedMin >= 0)
+    ? (() => {
+        const h = Math.floor(elapsedMin / 60), m = elapsedMin % 60;
+        return h > 0 ? `${h}時間${m}分` : `${m}分`;
+      })()
+    : null;
+
+  history.unshift({
+    goal, reward, face, won, winProb, elapsed,
+    date: new Date().toLocaleDateString('ja-JP', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' })
+  });
+  if (history.length > 30) history.pop();
+  localStorage.setItem('studyHistory', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (history.length === 0) {
+    list.innerHTML = '<li class="empty-history">まだ記録がありません 📝</li>';
+    return;
+  }
+  list.innerHTML = history.slice(0, 15).map(h => `
+    <li class="history-item">
+      <span class="history-icon">${h.won ? '🎉' : '📖'}</span>
+      <div class="history-body">
+        <div class="history-goal">${escHtml(h.goal)}</div>
+        <div class="history-meta">${h.date}${h.elapsed ? ' · ' + h.elapsed : ''}${h.winProb ? ' · ' + h.winProb + '/6' : ''}</div>
+      </div>
+      <span class="history-badge ${h.won ? 'win' : 'lose'}">${h.won ? '当たり' : 'はずれ'}</span>
+    </li>
+  `).join('');
+}
+
+function clearHistory() {
+  showConfirm('記録を消す', 'これまでの記録をすべて消します。<br>この操作は元に戻せません。', () => {
+    history = [];
+    localStorage.removeItem('studyHistory');
+    renderHistory();
+  });
+}
+
+function escHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+</script>
+</body>
+</html>
